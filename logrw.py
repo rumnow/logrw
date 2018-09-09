@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-### Roman Ushakov 30-08-2018
+### Roman Ushakov 31-08-2018
 ### OPS-11370
 
 import psycopg2
