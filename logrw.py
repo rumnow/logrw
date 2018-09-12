@@ -5,13 +5,14 @@
 import psycopg2
 import sys
 
-if len(sys.argv) != 6:
-    print("I need 5 papams: host, dbname, user, password, file for parse")
+if len(sys.argv) != 7:
+    print("I need 6 papams: host, dbname, user, password, noc, file for parse")
     sys.exit(0)
 
 start_str = "Peer Connection Initiated"  # String to connect
 end_str = "Inactivity timeout"  # String to disconnect
-fname = sys.argv[5] #"admin-openvpn.log"     # File to check
+fname = sys.argv[6] #"admin-openvpn.log"     # File to check
+noc = sys.argv[5]
 host = sys.argv[1]
 dbname = sys.argv[2]
 user = sys.argv[3]
@@ -41,7 +42,7 @@ try:
         f.seek(old_size, 0)
         lines = f.readlines()
 except:
-    print "File not found!"
+    print "File not found or no change: ", fname
     exit(403)
 
 for line in lines:
@@ -51,10 +52,10 @@ for line in lines:
                 + list_line[2] + " " + list_line[3]
         ip = str.split(list_line[6], ':')[0]
         #print "   Connect " + sdate, ip, str(list_line[7][1:-1])
-        l_query = ["connect", sdate, ip, str(list_line[7][1:-1])]
+        l_query = ["connect", sdate, ip, str(list_line[7][1:-1]), str(noc)]
         insert_query = "INSERT INTO public.stats VALUES ('"\
             + str("','".join(l_query)) + "');"
-        print insert_query
+#        print insert_query
         cur.execute(insert_query)
 
     if end_str in line:
@@ -69,10 +70,10 @@ for line in lines:
         sdate = list_line[4] + "-" + list_line[1] + "-" \
                 + list_line[2] + " " + list_line[3]
         #print "Disconnect " + sdate + " " + ip + " " + str(user_ip[0])
-        l_query = ["disconnect", sdate, ip, str(user_ip[0])]
+        l_query = ["disconnect", sdate, ip, str(user_ip[0]), str(noc)]
         insert_query = "INSERT INTO public.stats VALUES ('"\
             + str("','".join(l_query)) + "');"
-        print insert_query
+#        print insert_query
         cur.execute(insert_query)
 cur.execute("COMMIT;")
 
